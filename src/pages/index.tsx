@@ -12,9 +12,9 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
         <div>Majid Savalanpour - web site </div>
-        <div>Performance Testing with 500 KB images</div>
+        <div>Performance Testing with 1 MB images</div>
         <div style={{display: "flex"}}>
-          <img src="images/500KB.jpg" width="500"/>
+          <img src="images/1MB.jpg" width="500"/>
         </div>
         <div>Coming soon ...</div>
       </main>
