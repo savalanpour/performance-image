@@ -11,12 +11,15 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <div>Majid Savalanpour - web site </div>
-        <div>Performance Testing with 100 KB images</div>
+        <h1>The Impact of Photo Size on Website Performance</h1>
+        <br/>
+        <h3>An Analysis Using Lighthouse Performance Measurement Tool</h3>
+        <br/>
+        <div>Performance Testing with <b style={{fontSize: "20px"}}>100 KB</b> images</div>
+        <br/>
         <div style={{display: "flex"}}>
           <img src="images/100KB.jpg" width="500"/>
         </div>
-        <div>Coming soon ...</div>
       </main>
     </>
   )
