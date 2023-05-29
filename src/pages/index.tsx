@@ -15,10 +15,10 @@ export default function Home() {
         <br/>
         <h3>An Analysis Using Lighthouse Performance Measurement Tool</h3>
         <br/>
-        <div>Performance Testing with <b style={{fontSize: "20px"}}>800 KB</b> images</div>
+        <div>Performance Testing with <b style={{fontSize: "20px"}}>900 KB</b> images</div>
         <br/>
         <div style={{display: "flex"}}>
-          <img src="images/800KB.jpg" width="500"/>
+          <img src="images/900KB.jpg" width="500"/>
         </div>
       </main>
     </>
