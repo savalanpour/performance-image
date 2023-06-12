@@ -1,7 +1,108 @@
-import Head from 'next/head'
-import styles from '@/styles/Home.module.css'
+// @ts-nocheck
+import { useEffect, useState } from "react";
+import Head from "next/head";
+import { covertLighthouseResult } from "@/utils/covertLighthouseResult";
+import * as XLSX from "xlsx";
+import axios from "axios";
+import s from "@/styles/Home.module.css";
+import { Button, Card, List } from "antd";
+import audits from "public/json/audits";
+import urls from "public/json/urls.json";
+
+let interval: any = null;
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState(null);
+  const [count, setCount] = useState(0);
+  const [start, setStart] = useState(false);
+  const analyze = async (url: string, type: any) => {
+    setLoading(true);
+    const address = setUpQuery(url);
+    await fetch(address)
+      .then((response) => response.json())
+      .then(async (json) => {
+        setData(json);
+        try {
+          await axios.post("/api/addDataToSheetExcel", {
+            sheetName: type,
+            data: covertLighthouseResult(json),
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      });
+    setLoading(false);
+  };
+
+  const readExcelData = () => {
+    const url = "/file.xlsx";
+    const req = new XMLHttpRequest();
+    req.open("GET", url, true);
+    req.responseType = "arraybuffer";
+
+    req.onload = (e) => {
+      const data = new Uint8Array(req.response);
+      const workbook = XLSX.read(data, { type: "array" });
+
+      workbook.SheetNames.map((ws) => {
+        const sheetName = ws;
+        console.log("sheetName", sheetName);
+        const worksheet = workbook.Sheets[sheetName];
+
+        const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        console.log(excelData);
+      });
+    };
+
+    req.send();
+  };
+
+  const endRequest = () => {
+    clearInterval(interval);
+    setStart(false);
+    console.log("stop", stop);
+  };
+
+  const startRequest = () => {
+    setStart(true);
+    interval = setInterval(() => {
+      Object.keys(urls).map((key: string) => {
+        // @ts-ignore
+        analyze(urls[key], key);
+      });
+      console.log("sendRequest");
+      setCount((count) => count + 1);
+    }, 30000);
+  };
+
+  useEffect(() => {
+    return clearInterval(interval);
+  }, []);
+
+  const setUpQuery = (url: any) => {
+    return `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${url}&key=AIzaSyAIvTu8J_4GowY7uoQkTlGo7srhr46k9MA`;
+  };
+
+  const getAuditsData = (key: string) =>
+    // @ts-ignore
+    data?.lighthouseResult?.audits[key].displayValue;
+
+  const renderResultItem = (name: string, value: string) => {
+    return (
+      <List
+        grid={{ gutter: 16, column: 4 }}
+        dataSource={audits}
+        renderItem={(item) => (
+          <List.Item>
+            <Card title={item.title}>{getAuditsData(item.value)}</Card>
+          </List.Item>
+        )}
+      />
+    );
+  };
+
   return (
     <>
       <Head>
@@ -10,17 +111,49 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <h1>The Impact of Photo Size on Website Performance</h1>
-        <br/>
-        <h3>An Analysis Using Lighthouse Performance Measurement Tool</h3>
-        <br/>
-        <div>Performance Testing with <b style={{fontSize: "20px"}}>900 KB</b> images</div>
-        <br/>
-        <div style={{display: "flex"}}>
-          <img src="images/900KB.jpg" width="500"/>
+      <main className={s.main}>
+        <h1>performance Test App</h1>
+        <div>
+          <div className={s.stopStartRow}>
+            <Button disabled={start} className={s.btn} onClick={startRequest}>
+              Start All
+            </Button>
+            <span>{count}</span>
+            <Button disabled={!start} className={s.btn} onClick={endRequest}>
+              Stop All
+            </Button>
+          </div>
+          <div className={s.stopStartRow}>
+            <Button disabled={start} className={s.btn} onClick={readExcelData}>
+              Read excel
+            </Button>
+          </div>
+          {Object.keys(urls).map((key: string) => {
+            // @ts-ignore
+            return (
+              <Button
+                key={key}
+                className={s.btn}
+                onClick={() => analyze(urls[key], key)}
+              >
+                {key}
+              </Button>
+            );
+          })}
         </div>
+        {loading && <div>Loading ....</div>}
+        {data ? (
+          <List
+            grid={{ gutter: 16, column: 5 }}
+            dataSource={audits}
+            renderItem={(item) => (
+              <List.Item>
+                <Card title={item.title}>{getAuditsData(item.value)}</Card>
+              </List.Item>
+            )}
+          />
+        ) : null}
       </main>
     </>
-  )
+  );
 }

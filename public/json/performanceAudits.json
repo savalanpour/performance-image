@@ -1,0 +1,7 @@
+{
+  "First Contentful Paint (FCP)": "first-contentful-paint",
+  "Largest Contentful Paint (LCP)": "largest-contentful-paint",
+  "Total Blocking Time (TBT)": "total-blocking-time",
+  "Cumulative Layout Shift (CLS)": "cumulative-layout-shift",
+  "Speed Index (SI)": "speed-index"
+}
